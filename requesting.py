@@ -4,7 +4,7 @@ import requests
 import json
 
 # Configure input and output directories
-input_dir = "input_img/trial_1"  # Replace with the directory containing .tif files
+input_dir = "input_img/trial_1"  # Replace with the directory containing image files
 output_dir = "input_img/trial_1/responses"   # Replace with the directory to save JSON responses
 os.makedirs(output_dir, exist_ok=True)  # Create output directory if it doesn't exist
 
@@ -13,12 +13,15 @@ api_url = "https://solarquote.api.abacus.ai/api/predictWithBinaryData"
 deployment_token = "4f8ad7e922ec4c0aaf0661c0c32292b8"  # Replace with your token
 deployment_id = "ec5487e60"  # Replace with your deployment ID
 
-# Process all .tif files in the directory
-for tif_file in os.listdir(input_dir):
-    if tif_file.endswith(".tif"):
+# Supported file extensions
+supported_extensions = (".tif", ".jpg")
+
+# Process all supported files in the directory
+for image_file in os.listdir(input_dir):
+    if image_file.endswith(supported_extensions):  # Check for both .tif and .jpg
         try:
-            # Full path to the .tif file
-            file_path = os.path.join(input_dir, tif_file)
+            # Full path to the image file
+            file_path = os.path.join(input_dir, image_file)
             
             # POST request
             with open(file_path, "rb") as file_data:
@@ -34,15 +37,16 @@ for tif_file in os.listdir(input_dir):
                 response_json = response.json()
                 
                 # Save the response to a JSON file
-                output_file = os.path.join(output_dir, f"{os.path.splitext(tif_file)[0]}.json")
+                output_file = os.path.join(output_dir, f"{os.path.splitext(image_file)[0]}.json")
                 with open(output_file, "w") as json_file:
                     json.dump(response_json, json_file, indent=4)
-                print(f"Response saved for {tif_file}: {output_file}")
+                print(f"Response saved for {image_file}: {output_file}")
             else:
-                print(f"Failed for {tif_file}: {response.status_code} - {response.text}")
+                print(f"Failed for {image_file}: {response.status_code} - {response.text}")
         
         except Exception as e:
-            print(f"Error processing {tif_file}: {e}")
+            print(f"Error processing {image_file}: {e}")
+
 
 
 #The part that takes the unit8 imagearray values visualizes them into masks on the scale of image and 
